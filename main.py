@@ -213,6 +213,32 @@ def draw_bishop_top(radius, color=[]):
             glVertex3f(x * zr1,0.2*z1 , y * zr1)
         glEnd()
 
+def draw_cross(color=[]):
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    glBegin(GL_QUADS)
+    glColor(color)
+    cross_vertices = (
+        (-0.075,0,0),
+        (0.075,0,0),
+        (0.075,0.2,0),
+        (-0.075,0.2,0),
+        
+        
+        (0.2,0.275,0),
+        (-0.2,0.275,0),
+        (-0.2,0.2,0),
+        (0.2,0.2,0),
+
+        (0.075,0.25,0),
+        (0.075,0.35,0),
+        (-0.075,0.35,0),
+        (-0.075,0.25,0)
+        
+    )
+    for i in range(0,len(cross_vertices)):
+        glVertex3fv(cross_vertices[i])
+    glEnd()
+
 def queen(color = [],position = []):
     glPushMatrix()
     glTranslatef(position[0],position[1],position[2])
@@ -284,6 +310,22 @@ def bishop(color = [], position = []):
     glTranslatef(0,0.25,0)
     draw_sphere(0.08,color)
     glPopMatrix()
+
+def king(color = [], position = []):
+    glPushMatrix()
+    glTranslatef(position[0],position[1],position[2])
+    draw_cylinder(0.3,0.15,color)
+    glTranslatef(0,0.02,0)
+    draw_circle(0.25,color)
+    glTranslatef(0,-0.02,0)
+    draw_cylinder(0.25,0.6,color)
+    glTranslatef(0,0.6,0)
+    glTranslatef(0,0.02,0)
+    draw_circle(0.3,color)
+    glTranslatef(0,-0.02,0)
+    draw_crown(0.3,0.15,color)
+    draw_cross(color)
+    glPopMatrix()
 #endregion
 
 def main():
@@ -297,8 +339,8 @@ def main():
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
     glEnable(GL_DEPTH_TEST)
-    glLightfv(GL_LIGHT0,GL_POSITION,[5,1,-3,1])
-    glLightfv(GL_LIGHT0, GL_AMBIENT, [0.5, 0.2, 0.3, 1.0])
+    glLightfv(GL_LIGHT0, GL_POSITION,[0,1.5,-3,1])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 0.4, 0.6, 1.0])
     glEnable(GL_COLOR_MATERIAL)
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
 
@@ -371,6 +413,14 @@ def main():
         bishop(PIECE_BLACK,positions_bishops[3])
         bishop(PIECE_WHITE,positions_bishops[0])
         bishop(PIECE_WHITE,positions_bishops[1])
+
+        positions_kings = [
+            [0.5, -2.5, -5],
+            [0.5, -2.5, -12]
+        ]
+        king(PIECE_WHITE,positions_kings[0])
+        king(PIECE_BLACK,positions_kings[1])
+
         pygame.display.flip()
         pygame.time.wait(10)
 
