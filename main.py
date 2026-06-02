@@ -239,6 +239,66 @@ def draw_cross(color=[]):
         glVertex3fv(cross_vertices[i])
     glEnd()
 
+def draw_knight_top(color=[]):
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    glBegin(GL_QUADS)
+    glColor(color)
+    knight_vertices = (
+        (-0.15,0,0.1),
+        (0.45,0.08,0.1),
+        (0.45,0.15,0.2),
+        (-0.2,0.15,0.2),
+
+        (-0.15,0,-0.1),
+        (0.45,0.08,-0.1),
+        (0.45,0.15,-0.2),
+        (-0.2,0.15,-0.2),
+
+        (-0.15,0,0.1),
+        (-0.15,0,-0.1),
+        (0.45,0.08,-0.1),
+        (0.45,0.08,0.1),
+        
+        (0.45,0.08,0.1),
+        (0.45,0.08,-0.1),
+        (0.45,0.15,-0.2),
+        (0.45,0.15,0.2),
+        
+        (-0.15,0,0.1),
+        (-0.15,0,-0.1),
+        (-0.2,0.15,-0.2),
+        (-0.2,0.15,0.2),
+#--------------------------------------
+        (-0.15,0.3,0.1),
+        (0.45,0.2,0.1),
+        (0.45,0.15,0.2),
+        (-0.2,0.15,0.2),
+
+        (-0.15,0.3,-0.1),
+        (0.45,0.2,-0.1),
+        (0.45,0.15,-0.2),
+        (-0.2,0.15,-0.2),
+
+        (-0.15,0.3,0.1),
+        (-0.15,0.3,-0.1),
+        (0.45,0.2,-0.1),
+        (0.45,0.2,0.1),
+        
+        (0.45,0.2,0.1),
+        (0.45,0.2,-0.1),
+        (0.45,0.15,-0.2),
+        (0.45,0.15,0.2),
+        
+        (-0.15,0.3,0.1),
+        (-0.15,0.3,-0.1),
+        (-0.2,0.15,-0.2),
+        (-0.2,0.15,0.2),
+        
+    )
+    for i in range(0,len(knight_vertices)):
+        glVertex3fv(knight_vertices[i])
+    glEnd()
+
 def queen(color = [],position = []):
     glPushMatrix()
     glTranslatef(position[0],position[1],position[2])
@@ -327,6 +387,22 @@ def king(color = [], position = []):
     glTranslatef(0,0.025,0) 
     draw_cross(color)
     glPopMatrix()
+
+def knight(color = [], position = []):
+    glPushMatrix()
+    glTranslatef(position[0],position[1],position[2])
+    draw_cylinder(0.35,0.15,color)
+    glTranslatef(0,0.02,0)
+    draw_circle(0.35,color)
+    glTranslatef(0,-0.02,0)
+    draw_cylinder(0.25,0.4,color)
+    glTranslatef(0,0.4,0)
+    glTranslatef(0,0.02,0)
+    draw_circle(0.35,color)
+    glTranslatef(0,-0.02,0)
+    draw_knight_top(color)
+    glPopMatrix()
+
 #endregion
 
 def main():
@@ -421,6 +497,17 @@ def main():
         ]
         king(PIECE_WHITE,positions_kings[0])
         king(PIECE_BLACK,positions_kings[1])
+
+        positions_knights = [
+            [-2.5,-2.5,-5],
+            [2.5,-2.5,-5],
+            [-2.5,-2.5,-12],
+            [2.5,-2.5,-12]
+        ]
+        knight(PIECE_BLACK,positions_knights[2])
+        knight(PIECE_BLACK,positions_knights[3])
+        knight(PIECE_WHITE,positions_knights[0])
+        knight(PIECE_WHITE,positions_knights[1])
 
         pygame.display.flip()
         pygame.time.wait(10)
