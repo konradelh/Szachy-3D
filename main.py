@@ -57,10 +57,10 @@ def draw_circle(radius,color=[]):
         glVertex3f(radius * m.cos(next_angle), 0, radius * m.sin(next_angle))
     glEnd()
 
-def draw_cone(color=[]):
+def draw_cone(height,radius,color=[]):
     segments=16
-    height=0.5
-    radius=0.3
+    # height=0.5
+    # radius=0.3
     glBegin(GL_TRIANGLES)
     for i in range(segments):
         angle = i * 2 * m.pi / segments
@@ -293,7 +293,7 @@ def draw_knight_top(color=[]):
         (-0.15,0.3,-0.1),
         (-0.2,0.15,-0.2),
         (-0.2,0.15,0.2),
-        
+
     )
     for i in range(0,len(knight_vertices)):
         glVertex3fv(knight_vertices[i])
@@ -348,7 +348,7 @@ def rook(color = [], position = []):
 def pawn(color = [], position = []):
     glPushMatrix()
     glTranslatef(position[0],position[1],position[2])
-    draw_cone(color)
+    draw_cone(0.5,0.3,color)
     glTranslatef(0,-0.25,0)
     draw_cylinder(0.3,0.2,color)
     glTranslatef(0,0.65,0)
@@ -401,6 +401,10 @@ def knight(color = [], position = []):
     draw_circle(0.35,color)
     glTranslatef(0,-0.02,0)
     draw_knight_top(color)
+    glTranslatef(-0.1,0.325,0.07)
+    draw_cone(0.15,0.06,color)
+    glTranslatef(0,0,-0.14)
+    draw_cone(0.15,0.06,color)
     glPopMatrix()
 
 #endregion
@@ -416,10 +420,16 @@ def main():
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
     glEnable(GL_DEPTH_TEST)
-    glLightfv(GL_LIGHT0, GL_POSITION,[0,1.5,-3,1])
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 0.4, 0.6, 1.0])
+    glLightfv(GL_LIGHT0, GL_POSITION,[-1,0,-13,1])
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1.0])
+    glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
+    glEnable(GL_LIGHT1)
+    glLightfv(GL_LIGHT1, GL_POSITION,[-1,0,-5,1])
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, [1, 1, 1, 1.0])
+    glLightfv(GL_LIGHT1, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
     glEnable(GL_COLOR_MATERIAL)
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE)
+    
+    
 
     position = []
     for j in range(0,8):
@@ -516,5 +526,7 @@ def main():
             if (event.type == pygame.QUIT) or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 quit()  
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                gluLookAt(0,0,-17,0,0,-9,0,1,0)
                 
 main()
