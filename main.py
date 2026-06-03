@@ -44,6 +44,19 @@ def draw_square(fill_color=[]):
         glVertex3fv(vertices[vertex])
     glEnd()
 
+def lightup(position=[]):
+    glPushMatrix()
+    glTranslatef(position[0],position[1],position[2])
+    glLineWidth(10)
+    glBegin(GL_LINES)
+    for edge in edges:
+        glColor(0,1,0)
+        for vertex in edge:
+            glVertex3fv(vertices[vertex])
+
+    glEnd()
+    glPopMatrix()
+
 def draw_circle(radius,color=[]):
     segments=16
     glBegin(GL_TRIANGLES)
@@ -268,7 +281,7 @@ def draw_knight_top(color=[]):
         (-0.15,0,-0.1),
         (-0.2,0.15,-0.2),
         (-0.2,0.15,0.2),
-#--------------------------------------
+
         (-0.15,0.3,0.1),
         (0.45,0.2,0.1),
         (0.45,0.15,0.2),
@@ -419,7 +432,6 @@ def main():
 
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
-    glEnable(GL_DEPTH_TEST)
     glLightfv(GL_LIGHT0, GL_POSITION,[-1,0,-13,1])
     glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1.0])
     glLightfv(GL_LIGHT0, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
@@ -427,6 +439,7 @@ def main():
     glLightfv(GL_LIGHT1, GL_POSITION,[-1,0,-5,1])
     glLightfv(GL_LIGHT1, GL_DIFFUSE, [1, 1, 1, 1.0])
     glLightfv(GL_LIGHT1, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
+    glEnable(GL_DEPTH_TEST)
     glEnable(GL_COLOR_MATERIAL)
     
     
@@ -435,6 +448,8 @@ def main():
     for j in range(0,8):
         for i in range (0,8):
             position.append((-3.5+i,-2,-j-5))
+
+    lightup_position = [-3.5,-1.98,-5]
 
     while True:
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
@@ -472,55 +487,70 @@ def main():
         for i in range(0,len(positions_white_pawns)):
             pawn(PIECE_WHITE,positions_white_pawns[i])
 
-        positions_rooks = [
-            [-3.5,-2.5,-5],
-            [3.5,-2.5,-5],
+        positions_black_rooks = [
             [-3.5,-2.5,-12],
             [3.5,-2.5,-12]
         ]
-        rook(PIECE_BLACK,positions_rooks[2])
-        rook(PIECE_BLACK,positions_rooks[3])
-        rook(PIECE_WHITE,positions_rooks[0])
-        rook(PIECE_WHITE,positions_rooks[1])
+        for i in range (0,len(positions_black_rooks)):
+            rook(PIECE_BLACK,positions_black_rooks[i])
+        positions_white_rooks = [
+            [-3.5,-2.5,-5],
+            [3.5,-2.5,-5]
+        ]
+        for i in range (0,len(positions_white_rooks)):
+            rook(PIECE_WHITE,positions_white_rooks[i])
 
-        positions_queens = [
-            [-0.5,-2.5,-5],
+        positions_black_queens = [
             [-0.5,-2.5,-12]
         ]
-        queen(PIECE_BLACK,positions_queens[1])
-        queen([PIECE_WHITE],positions_queens[0])
+        for i in range (0,len(positions_black_queens)):
+            queen(PIECE_BLACK,positions_black_queens[i])
+        positions_white_queens = [
+            [-0.5,-2.5,-5]
+        ]
+        for i in range (0,len(positions_black_queens)):
+            queen([PIECE_WHITE],positions_white_queens[i])
 
-        positions_bishops = [
-            [-1.5,-2.5,-5],
-            [1.5,-2.5,-5],
+        positions_black_bishops = [
             [-1.5,-2.5,-12],
             [1.5,-2.5,-12]
         ]
-        bishop(PIECE_BLACK,positions_bishops[2])
-        bishop(PIECE_BLACK,positions_bishops[3])
-        bishop(PIECE_WHITE,positions_bishops[0])
-        bishop(PIECE_WHITE,positions_bishops[1])
+        for i in range(0,len(positions_black_bishops)):
+            bishop(PIECE_BLACK,positions_black_bishops[i])
+        positions_white_bishops = [
+            [-1.5,-2.5,-5],
+            [1.5,-2.5,-5]
+        ]
+        for i in range(0,len(positions_white_bishops)):
+            bishop(PIECE_WHITE,positions_white_bishops[i])
 
-        positions_kings = [
-            [0.5, -2.5, -5],
+
+        positions_black_kings = [
             [0.5, -2.5, -12]
         ]
-        king(PIECE_WHITE,positions_kings[0])
-        king(PIECE_BLACK,positions_kings[1])
+        for i in range(0,len(positions_black_kings)):
+            king(PIECE_BLACK,positions_black_kings[i])
+        positions_white_kings = [
+            [0.5, -2.5, -5]
+        ]
+        for i in range(0,len(positions_white_kings)):
+            king(PIECE_WHITE,positions_white_kings[i])
 
-        positions_knights = [
-            [-2.5,-2.5,-5],
-            [2.5,-2.5,-5],
+        positions_black_knights = [
             [-2.5,-2.5,-12],
             [2.5,-2.5,-12]
         ]
-        knight(PIECE_BLACK,positions_knights[2])
-        knight(PIECE_BLACK,positions_knights[3])
-        knight(PIECE_WHITE,positions_knights[0])
-        knight(PIECE_WHITE,positions_knights[1])
-
-        pygame.display.flip()
-        pygame.time.wait(10)
+        for i in range(0,len(positions_black_knights)):
+            knight(PIECE_BLACK,positions_black_knights[i])
+        positions_white_knights = [
+            [-2.5,-2.5,-5],
+            [2.5,-2.5,-5]
+        ]
+        for i in range(0,len(positions_white_knights)):
+            knight(PIECE_WHITE,positions_white_knights[i])
+        
+        # for i in range (0,len(lightup_positions)):
+        lightup(lightup_position)
 
         for event in pygame.event.get():  
             if (event.type == pygame.QUIT) or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -528,5 +558,19 @@ def main():
                 quit()  
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 gluLookAt(0,0,-17,0,0,-9,0,1,0)
-                
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                if lightup_position[0] != 3.5:
+                    lightup_position[0] += 1
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                if lightup_position[0] != -3.5:
+                    lightup_position[0] -= 1
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                if lightup_position[2] != -12:
+                    lightup_position[2] -= 1
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                if lightup_position[2] != -5:
+                    lightup_position[2] += 1
+
+        pygame.display.flip()
+        pygame.time.wait(10)         
 main()
