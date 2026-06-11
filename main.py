@@ -48,7 +48,7 @@ def draw_square(fill_color=[]):
 def lightup(position=[],color=[]):
     glPushMatrix()
     glTranslatef(position[0],position[1],position[2])
-    glLineWidth(10)
+    glLineWidth(12)
     glBegin(GL_LINES)
     for edge in edges:
         glColor(color)
@@ -492,44 +492,68 @@ def main():
                 quit()  
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if czy_wybrane_pole == 0:
-                    gra.pseudoMoves = []
-                    posible_moves_lightup_positions = []
-                    for index in range(64):
-                        gra.generateMoves(index)
-                    for moves in gra.pseudoMoves:
-                        if moves.getFromSquare() == convert_position_to_index(lightup_position):
-                            pole = convert_index_to_position(moves.getToSquare())
-                            pole[1] += 0.52
-                            posible_moves_lightup_positions.append(pole)
                     wybrane_pole = lightup_position.copy()
-                    czy_aktualizacja = 1
-                    czy_wybrane_pole = 1
-                elif czy_wybrane_pole == 1:
+                    if ((1 << convert_position_to_index(wybrane_pole) )& gra.allPiecesTable[currentPlayer]):
+                        gra.pseudoMoves = []
+                        posible_moves_lightup_positions = []
+                        for index in range(64):
+                            gra.generateMoves(index)
+                        for moves in gra.pseudoMoves:
+                            if moves.getFromSquare() == convert_position_to_index(wybrane_pole):
+                                pole = convert_index_to_position(moves.getToSquare())
+                                pole[1] += 0.52
+                                posible_moves_lightup_positions.append(pole)
+                        czy_aktualizacja = 1
+                        czy_wybrane_pole = 1
+                elif czy_wybrane_pole == 1 and ((1 << convert_position_to_index(wybrane_pole) )& gra.allPiecesTable[currentPlayer]):
                     for moves in gra.pseudoMoves:
                         if moves.getToSquare() == convert_position_to_index(lightup_position) and moves.getFromSquare() == convert_position_to_index(wybrane_pole):
                             gra.makeMove(moves)
-                    gluLookAt(0,0,-17,0,0,-9,0,1,0)
-                    czy_wybrane_pole = 0
-                    czy_aktualizacja = 1
-                    currentPlayer  = (currentPlayer + 1) % 2
+                            gluLookAt(0,0,-17,0,0,-9,0,1,0)
+                            czy_wybrane_pole = 0
+                            czy_aktualizacja = 1
+                            currentPlayer  = (currentPlayer + 1) % 2
                     
+#region sterowanie kursorem
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                if lightup_position[0] != 3.5:
-                    lightup_position[0] += 1
-                    czy_aktualizacja = 1
+                if currentPlayer  == 1:
+                    if lightup_position[0] != 3.5:
+                        lightup_position[0] += 1
+                        czy_aktualizacja = 1
+                else:
+                    if lightup_position[0] != -3.5:
+                        lightup_position[0] -= 1
+                        czy_aktualizacja = 1
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                if lightup_position[0] != -3.5:
-                    lightup_position[0] -= 1
-                    czy_aktualizacja = 1
+                if currentPlayer  == 1:
+                    if lightup_position[0] != -3.5:
+                        lightup_position[0] -= 1
+                        czy_aktualizacja = 1
+                else:
+                    if lightup_position[0] != 3.5:
+                        lightup_position[0] += 1
+                        czy_aktualizacja = 1
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                if lightup_position[2] != -12:
-                    lightup_position[2] -= 1
-                    czy_aktualizacja = 1
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                if lightup_position[2] != -5:
-                    lightup_position[2] += 1
-                    czy_aktualizacja = 1
+                if currentPlayer  == 1:
+                    if lightup_position[2] != -12:
+                        lightup_position[2] -= 1
+                        czy_aktualizacja = 1
+                else:
+                    if lightup_position[2] != -5:
+                        lightup_position[2] += 1
+                        czy_aktualizacja = 1
 
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                if currentPlayer  == 1:
+                    if lightup_position[2] != -5:
+                        lightup_position[2] += 1
+                        czy_aktualizacja = 1
+                else:
+                    if lightup_position[2] != -12:
+                        lightup_position[2] -= 1
+                        czy_aktualizacja = 1
+#endregion
+        
         #rysowanie planszy
         if czy_aktualizacja == 1:
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)

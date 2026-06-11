@@ -770,32 +770,32 @@ class chess:
       def isCheckamte (self,playerColor): 
             pass
 
-      def mainGame(self): 
-            currentPlayer = chess.WHITE
-            while True: 
-                  # game.printBoard()
-                  for index in range(64): 
-                        self.generateMoves(index)
-                  inputFromSquare = input("Enter from square: ")
-                  inputToSquare = input("Enter to square : ")
+      # def mainGame(self): 
+      #       currentPlayer = chess.WHITE
+      #       while True: 
+      #             game.printBoard()
+      #             for index in range(64): 
+      #                   self.generateMoves(index)
+      #             inputFromSquare = input("Enter from square: ")
+      #             inputToSquare = input("Enter to square : ")
 
-                  fromSquareIndex = chess.SQUARES[inputFromSquare]
-                  toSquareIndex = chess.SQUARES[inputToSquare]
+      #             fromSquareIndex = chess.SQUARES[inputFromSquare]
+      #             toSquareIndex = chess.SQUARES[inputToSquare]
 
-                  while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
-                        inputFromSquare = input("Enter from square: ")
-                        inputToSquare = input("Enter to square : ")
-                        fromSquareIndex = chess.SQUARES[inputFromSquare]
-                        toSquareIndex = chess.SQUARES[inputToSquare]
+      #             while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
+      #                   inputFromSquare = input("Enter from square: ")
+      #                   inputToSquare = input("Enter to square : ")
+      #                   fromSquareIndex = chess.SQUARES[inputFromSquare]
+      #                   toSquareIndex = chess.SQUARES[inputToSquare]
 
 
 
-                  for move in self.pseudoMoves: 
-                        if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
-                              self.makeMove(move)
-                              break
-                  # game.printBoard()
-                  currentPlayer  = (currentPlayer + 1) % 2
+      #             for move in self.pseudoMoves: 
+      #                   if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
+      #                         self.makeMove(move)
+      #                         break
+      #             game.printBoard()
+      #             currentPlayer  = (currentPlayer + 1) % 2
 
 
 class Move: 
