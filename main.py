@@ -1,6 +1,7 @@
 import pygame
 import math as m
 import random as r
+from logika import *
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -360,7 +361,7 @@ def rook(color = [], position = []):
 
 def pawn(color = [], position = []):
     glPushMatrix()
-    glTranslatef(position[0],position[1],position[2])
+    glTranslatef(position[0],position[1]+0.25,position[2])
     draw_cone(0.5,0.3,color)
     glTranslatef(0,-0.25,0)
     draw_cylinder(0.3,0.2,color)
@@ -420,6 +421,19 @@ def knight(color = [], position = []):
     draw_cone(0.15,0.06,color)
     glPopMatrix()
 
+def convert_BitBoard_to_position(bitboard):
+    temp = bitboard
+    positions = []
+    while temp != 0:
+            y = -2.5
+            index = chess.getMSB(temp)
+            if index is None or index < 0:
+                break
+            x = index % 8 - 3.5
+            z = -(index // 8) - 5
+            positions.append([x,y,z])
+            temp = chess.popBit(temp,index)
+    return positions
 #endregion
 
 def main():
@@ -441,13 +455,13 @@ def main():
     glLightfv(GL_LIGHT1, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_COLOR_MATERIAL)
-    
-    
 
-    position = []
+    square_positions = []
     for j in range(0,8):
         for i in range (0,8):
-            position.append((-3.5+i,-2,-j-5))
+            square_positions.append((-3.5+i,-2,-j-5))
+
+    gra = chess()
 
     lightup_position = [-3.5,-1.98,-5]
 
@@ -456,9 +470,9 @@ def main():
 
         #rysowanie planszy
         counter = 1
-        for i in range(0, len(position)):
+        for i in range(0, len(square_positions)):
             glPushMatrix()
-            glTranslatef(position[i][0],position[i][1],position[i][2])
+            glTranslatef(square_positions[i][0],square_positions[i][1],square_positions[i][2])
 
             if i%8 == 0 and i != 0 and counter == 0:
                 counter = 1
@@ -475,77 +489,45 @@ def main():
             glPopMatrix() 
 
         #rysowanie figur
-        positions_black_pawns = []
-        for i in range(0,8):
-            positions_black_pawns.append([-3.5+i,-2.25,-11])
+        positions_black_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][0])
         for i in range(0,len(positions_black_pawns)):
             pawn(PIECE_BLACK,positions_black_pawns[i])
-
-        positions_white_pawns = []
-        for i in range(0,8):
-            positions_white_pawns.append([-3.5+i,-2.25,-6])
+        positions_white_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][0])
         for i in range(0,len(positions_white_pawns)):
             pawn(PIECE_WHITE,positions_white_pawns[i])
 
-        positions_black_rooks = [
-            [-3.5,-2.5,-12],
-            [3.5,-2.5,-12]
-        ]
+        positions_black_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][2])
         for i in range (0,len(positions_black_rooks)):
             rook(PIECE_BLACK,positions_black_rooks[i])
-        positions_white_rooks = [
-            [-3.5,-2.5,-5],
-            [3.5,-2.5,-5]
-        ]
+        positions_white_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][2])
         for i in range (0,len(positions_white_rooks)):
             rook(PIECE_WHITE,positions_white_rooks[i])
 
-        positions_black_queens = [
-            [-0.5,-2.5,-12]
-        ]
+        positions_black_queens = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][5])
         for i in range (0,len(positions_black_queens)):
             queen(PIECE_BLACK,positions_black_queens[i])
-        positions_white_queens = [
-            [-0.5,-2.5,-5]
-        ]
-        for i in range (0,len(positions_black_queens)):
-            queen([PIECE_WHITE],positions_white_queens[i])
+        positions_white_queens = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][5])
+        for i in range (0,len(positions_white_queens)):
+            queen(PIECE_WHITE,positions_white_queens[i])
 
-        positions_black_bishops = [
-            [-1.5,-2.5,-12],
-            [1.5,-2.5,-12]
-        ]
+        positions_black_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][4])
         for i in range(0,len(positions_black_bishops)):
             bishop(PIECE_BLACK,positions_black_bishops[i])
-        positions_white_bishops = [
-            [-1.5,-2.5,-5],
-            [1.5,-2.5,-5]
-        ]
+        positions_white_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][4])
         for i in range(0,len(positions_white_bishops)):
             bishop(PIECE_WHITE,positions_white_bishops[i])
 
-
-        positions_black_kings = [
-            [0.5, -2.5, -12]
-        ]
+        positions_black_kings = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][1])
         for i in range(0,len(positions_black_kings)):
             king(PIECE_BLACK,positions_black_kings[i])
-        positions_white_kings = [
-            [0.5, -2.5, -5]
-        ]
+        positions_white_kings = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][1])
         for i in range(0,len(positions_white_kings)):
             king(PIECE_WHITE,positions_white_kings[i])
 
-        positions_black_knights = [
-            [-2.5,-2.5,-12],
-            [2.5,-2.5,-12]
-        ]
+        positions_black_knights = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][3])
         for i in range(0,len(positions_black_knights)):
             knight(PIECE_BLACK,positions_black_knights[i])
-        positions_white_knights = [
-            [-2.5,-2.5,-5],
-            [2.5,-2.5,-5]
-        ]
+        positions_white_knights = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][3])
         for i in range(0,len(positions_white_knights)):
             knight(PIECE_WHITE,positions_white_knights[i])
         
