@@ -621,38 +621,38 @@ class chess:
                       # change the line above to: self.enPassantSquare = ep_square_index
               else:
                   self.enPassantSquare = 0                   
-      def printBoard(self):  # DO debugowania USUN POZNIEJ 
-                  print("   -----------------")
+      # def printBoard(self):  # DO debugowania USUN POZNIEJ 
+      #             print("   -----------------")
             
-                  # Character map matching your piecesTable indices:
-                  # 0: Pawns, 1: King, 2: Rooks, 3: Knights, 4: Bishops, 5: Queen
-                  piece_chars = {
-                        chess.WHITE: ['P', 'K', 'R', 'N', 'B', 'Q'],
-                        chess.BLACK: ['p', 'k', 'r', 'n', 'b', 'q']
-                  }
+      #             # Character map matching your piecesTable indices:
+      #             # 0: Pawns, 1: King, 2: Rooks, 3: Knights, 4: Bishops, 5: Queen
+      #             piece_chars = {
+      #                   chess.WHITE: ['P', 'K', 'R', 'N', 'B', 'Q'],
+      #                   chess.BLACK: ['p', 'k', 'r', 'n', 'b', 'q']
+      #             }
 
-                  for rank in reversed(range(8)): 
-                        rowString = f"{rank + 1} | "
-                        for file in range(8): 
-                              mask = 1 << (rank * 8 + file)
-                              char_to_print = '.' # Default empty square
+      #             for rank in reversed(range(8)): 
+      #                   rowString = f"{rank + 1} | "
+      #                   for file in range(8): 
+      #                         mask = 1 << (rank * 8 + file)
+      #                         char_to_print = '.' # Default empty square
                         
-                              # Only search for a piece if the square is occupied
-                              if mask & self.all_pieces: 
-                                    found = False
-                                    for color in (chess.WHITE, chess.BLACK):
-                                          for piece_idx in range(6):
-                                                if mask & self.piecesTable[color][piece_idx]:
-                                                      char_to_print = piece_chars[color][piece_idx]
-                                                      found = True
-                                                      break
-                                          if found:
-                                                break
+      #                         # Only search for a piece if the square is occupied
+      #                         if mask & self.all_pieces: 
+      #                               found = False
+      #                               for color in (chess.WHITE, chess.BLACK):
+      #                                     for piece_idx in range(6):
+      #                                           if mask & self.piecesTable[color][piece_idx]:
+      #                                                 char_to_print = piece_chars[color][piece_idx]
+      #                                                 found = True
+      #                                                 break
+      #                                     if found:
+      #                                           break
                                           
-                              rowString += char_to_print + " "
-                        print(rowString) 
-                  print("   -----------------")
-                  print("    a b c d e f g h")
+      #                         rowString += char_to_print + " "
+      #                   print(rowString) 
+      #             print("   -----------------")
+      #             print("    a b c d e f g h")
       
       
       
@@ -770,32 +770,32 @@ class chess:
       def isCheckamte (self,playerColor): 
             pass
 
-      # def mainGame(self): 
-      #       currentPlayer = chess.WHITE
-      #       while True: 
-      #             game.printBoard()
-      #             for index in range(64): 
-      #                   self.generateMoves(index)
-      #             inputFromSquare = input("Enter from square: ")
-      #             inputToSquare = input("Enter to square : ")
+      def mainGame(self): 
+            currentPlayer = chess.WHITE
+            while True: 
+                  # game.printBoard()
+                  for index in range(64): 
+                        self.generateMoves(index)
+                  inputFromSquare = input("Enter from square: ")
+                  inputToSquare = input("Enter to square : ")
 
-      #             fromSquareIndex = chess.SQUARES[inputFromSquare]
-      #             toSquareIndex = chess.SQUARES[inputToSquare]
+                  fromSquareIndex = chess.SQUARES[inputFromSquare]
+                  toSquareIndex = chess.SQUARES[inputToSquare]
 
-      #             while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
-      #                   inputFromSquare = input("Enter from square: ")
-      #                   inputToSquare = input("Enter to square : ")
-      #                   fromSquareIndex = chess.SQUARES[inputFromSquare]
-      #                   toSquareIndex = chess.SQUARES[inputToSquare]
+                  while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
+                        inputFromSquare = input("Enter from square: ")
+                        inputToSquare = input("Enter to square : ")
+                        fromSquareIndex = chess.SQUARES[inputFromSquare]
+                        toSquareIndex = chess.SQUARES[inputToSquare]
 
 
 
-      #             for move in self.pseudoMoves: 
-      #                   if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
-      #                         self.makeMove(move)
-      #                         break
-      #             game.printBoard()
-      #             currentPlayer  = (currentPlayer + 1) % 2
+                  for move in self.pseudoMoves: 
+                        if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
+                              self.makeMove(move)
+                              break
+                  # game.printBoard()
+                  currentPlayer  = (currentPlayer + 1) % 2
 
 
 class Move: 
