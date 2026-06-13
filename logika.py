@@ -449,7 +449,7 @@ class chess:
 # BISHOPS
 ######################################
             if (fromSquare & self.piecesTable[color][4]):
-                  attacks = game.generateBishopAttacks(fromSquareIndex)
+                  attacks = self.generateBishopAttacks(fromSquareIndex)
                   self.calculateMovesFromTables(attacks, "bishop", fromSquareIndex, opponent_occupancy)
                        
 #######################################
@@ -457,7 +457,7 @@ class chess:
 ######################################
  
             if( fromSquare & self.piecesTable[color][2]): 
-                  attacks = game.generateRookAttacks(fromSquareIndex)
+                  attacks = self.generateRookAttacks(fromSquareIndex)
                   self.calculateMovesFromTables(attacks, "rooks", fromSquareIndex, opponent_occupancy)
 
 #######################################
@@ -465,7 +465,7 @@ class chess:
 ######################################
  
             if( fromSquare & self.piecesTable[color][5]): 
-                  attacks = game.generateQueenAttacks(fromSquareIndex)
+                  attacks = self.generateQueenAttacks(fromSquareIndex)
                   self.calculateMovesFromTables(attacks, "queen", fromSquareIndex, opponent_occupancy)
 #######################################
 # KING 
@@ -685,27 +685,27 @@ class chess:
                   return
 
 
-            piecesTable[color][foundPiece] = game.popBit(piecesTable[color][foundPiece], move.getFromSquare())
-            if (move.isPromotion()):
-                        
-                  chosenPiece = 3 # Zaimplementowac wybieranie z interfejsu
-                  piecesTable[color][foundPiece] = game.insertBit(piecesTable[color][chosenPiece], move.getToSquare())
+            piecesTable[color][foundPiece] = self.popBit(piecesTable[color][foundPiece], move.getFromSquare())
+
+            if (move.isPromotion()):       
+                  chosenPiece = 5 # Zaimplementowac wybieranie z interfejsu
+                  piecesTable[color][foundPiece] = self.insertBit(piecesTable[color][chosenPiece], move.getToSquare())
             else: 
-                  piecesTable[color][foundPiece] = game.insertBit(piecesTable[color][foundPiece], move.getToSquare())
+                  piecesTable[color][foundPiece] = self.insertBit(piecesTable[color][foundPiece], move.getToSquare())
 
             if(move.isCastle()):
                   if move.getToSquare() == chess.SQUARES['g1']:
-                        piecesTable[color][2] = game.popBit(piecesTable[color][2], chess.SQUARES['h1'])
-                        piecesTable[color][2] = game.insertBit(piecesTable[color][2], chess.SQUARES['f1'])
+                        piecesTable[color][2] = self.popBit(piecesTable[color][2], chess.SQUARES['h1'])
+                        piecesTable[color][2] = self.insertBit(piecesTable[color][2], chess.SQUARES['f1'])
                   elif move.getToSquare() == chess.SQUARES['c1']:
-                        piecesTable[color][2] = game.popBit(piecesTable[color][2], chess.SQUARES['a1'])
-                        piecesTable[color][2] = game.insertBit(piecesTable[color][2], chess.SQUARES['d1'])
+                        piecesTable[color][2] = self.popBit(piecesTable[color][2], chess.SQUARES['a1'])
+                        piecesTable[color][2] = self.insertBit(piecesTable[color][2], chess.SQUARES['d1'])
                   elif move.getToSquare() == chess.SQUARES['g8']:
-                        piecesTable[color][2] = game.popBit(piecesTable[color][2], chess.SQUARES['h8'])
-                        piecesTable[color][2] = game.insertBit(piecesTable[color][2], chess.SQUARES['f8'])
+                        piecesTable[color][2] = self.popBit(piecesTable[color][2], chess.SQUARES['h8'])
+                        piecesTable[color][2] = self.insertBit(piecesTable[color][2], chess.SQUARES['f8'])
                   elif move.getToSquare() == chess.SQUARES['c8']:
-                        piecesTable[color][2] = game.popBit(piecesTable[color][2], chess.SQUARES['a8'])
-                        piecesTable[color][2] = game.insertBit(piecesTable[color][2], chess.SQUARES['d8'])
+                        piecesTable[color][2] = self.popBit(piecesTable[color][2], chess.SQUARES['a8'])
+                        piecesTable[color][2] = self.insertBit(piecesTable[color][2], chess.SQUARES['d8'])
 
             opponendFoundPiece = -1
 
@@ -716,11 +716,11 @@ class chess:
                               break
                   if (move.isEnPassant()):
                         if color == chess.WHITE:
-                              piecesTable[opponentColor][0] = game.popBit(piecesTable[opponentColor][0], move.getToSquare() - 8)
+                              piecesTable[opponentColor][0] = self.popBit(piecesTable[opponentColor][0], move.getToSquare() - 8)
                         else:
-                              piecesTable[opponentColor][0] = game.popBit(piecesTable[opponentColor][0], move.getToSquare() + 8)
+                              piecesTable[opponentColor][0] = self.popBit(piecesTable[opponentColor][0], move.getToSquare() + 8)
                   if (opponendFoundPiece != -1):
-                        piecesTable[opponentColor][opponendFoundPiece] = game.popBit(piecesTable[opponentColor][opponendFoundPiece], move.getToSquare())
+                        piecesTable[opponentColor][opponendFoundPiece] = self.popBit(piecesTable[opponentColor][opponendFoundPiece], move.getToSquare())
 
             self.enPassantSquare = 0
             if move.isDoublePush():
@@ -734,9 +734,10 @@ class chess:
             self.piecesTable = piecesTable
             self.reconstructOccupancy()
 
-            isEverythingOK =  not self.validate( color) 
+            isEverythingOK =  not self.isKingAttacked( color) 
             if isEverythingOK:
                   self.reconstructOccupancy()
+                  return True
             else:
 
                   self.piecesTable = copyPiecesTable
@@ -746,29 +747,39 @@ class chess:
                   self.all_pieces = all_pieces
                   self.pseudoMoves = copyPseudoMoves
                   print("BAD MOVE ")
+                  return False # do sprawdzania mata pozniej
+            
 
 
       def reconstructOccupancy(self):
-             self.allPiecesTable = [0, 0]
-             for i in range(2):
-                      for j in range(6): 
-                            self.allPiecesTable[i] |= self.piecesTable[i][j]
-             self.white_pieces = self.allPiecesTable[chess.WHITE]
-             self.black_pieces = self.allPiecesTable[chess.BLACK]
-             self.all_pieces = self.white_pieces | self.black_pieces
+            self.allPiecesTable = [0, 0]
+            for i in range(2):
+                  for j in range(6): 
+                        self.allPiecesTable[i] |= self.piecesTable[i][j]
+            self.white_pieces = self.allPiecesTable[chess.WHITE]
+            self.black_pieces = self.allPiecesTable[chess.BLACK]
+            self.all_pieces = self.white_pieces | self.black_pieces
             
 
-      def validate(self, playerColor): 
+      def isKingAttacked(self, playerColor): 
             self.pseudoMoves = []
             for index in range(64): 
-                  game.generateMoves(index)
+                  self.generateMoves(index)
             king = self.piecesTable[playerColor][1]
             kingIndex = self.getLSB(king)
             if(self.isAttacked(kingIndex)): 
-                        return True
+                  return True
             return False
       def isCheckamte (self,playerColor): 
-            pass
+            playerMoves = []
+            checkmated = True
+            for move in self.pseudoMoves:
+                  if(1 << move.getFromSquare() ) & self.allPiecesTable[playerColor]: playerMoves.append(move)
+            
+            for playerMove in playerMoves: 
+                  isValid = self.makeMove(playerMove) # bedzie sprawdzac dalej na tej samej pozycji, bo plansza zmieni sie jedynie gdy bedzie jakis mozliwy ruch, a wtedy wypluwane jest od razu false
+                  if(isValid): return False
+            return checkmated
 
       # def mainGame(self): 
       #       currentPlayer = chess.WHITE
@@ -829,7 +840,9 @@ chess.KNIGHT_ATTACKS = chess.generateKnightAttacks()
 chess.POSITIVE_RAY_BITBOARDS = chess.generatePositiveRays()
 chess.NEGATIVE_RAY_BITBOARDS = chess.generateNegativeRays()
 chess.KING_ATTACKS = chess.generateKingAttacks()
-game = chess() 
+# game = chess()
+
+
 #game.printBoard()
 #game.printBitBoard(chess.KNIGHT_ATTACKS[chess.SQUARES['e5']])
 #print(chess.SQUARES['h8'])

@@ -444,7 +444,6 @@ def convert_index_to_position(index):
     z = -(index // 8) - 5
     return [x,y,z]
     
-
 def inicjalizacja():
     pygame.init()
     display = (2400,1200)
@@ -481,7 +480,6 @@ def main():
     czy_aktualizacja = 1
     czy_wybrane_pole = 0
     wybrane_pole = []
-
     currentPlayer = 1
 
     while True:
@@ -493,26 +491,29 @@ def main():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if czy_wybrane_pole == 0:
                     wybrane_pole = lightup_position.copy()
-                    if ((1 << convert_position_to_index(wybrane_pole) )& gra.allPiecesTable[currentPlayer]):
-                        gra.pseudoMoves = []
+                    if ((1 << convert_position_to_index(wybrane_pole)) & gra.allPiecesTable[currentPlayer]):
                         posible_moves_lightup_positions = []
+
                         for index in range(64):
                             gra.generateMoves(index)
+
                         for moves in gra.pseudoMoves:
                             if moves.getFromSquare() == convert_position_to_index(wybrane_pole):
-                                pole = convert_index_to_position(moves.getToSquare())
+                                pole = convert_index_to_position(moves.getToSquare()).copy()
                                 pole[1] += 0.52
                                 posible_moves_lightup_positions.append(pole)
                         czy_aktualizacja = 1
                         czy_wybrane_pole = 1
-                elif czy_wybrane_pole == 1 and ((1 << convert_position_to_index(wybrane_pole) )& gra.allPiecesTable[currentPlayer]):
+                else:
                     for moves in gra.pseudoMoves:
                         if moves.getToSquare() == convert_position_to_index(lightup_position) and moves.getFromSquare() == convert_position_to_index(wybrane_pole):
-                            gra.makeMove(moves)
+                            posible_moves_lightup_positions = []
                             gluLookAt(0,0,-17,0,0,-9,0,1,0)
                             czy_wybrane_pole = 0
                             czy_aktualizacja = 1
                             currentPlayer  = (currentPlayer + 1) % 2
+                            gra.makeMove(moves)
+                            
                     
 #region sterowanie kursorem
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
