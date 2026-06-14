@@ -576,8 +576,7 @@ def view_game():
                 draw_pieces(gra)
                 pygame.display.flip()
                 pygame.time.wait(10)
-    pygame.time.wait(2000)
-    made_moves = []
+    pygame.time.wait(1000)
     menu('viewing complete')    
 
 def main():
