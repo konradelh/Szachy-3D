@@ -489,8 +489,11 @@ def main():
                 pygame.quit()
                 quit()  
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                print("---------------------------------------")
                 if czy_wybrane_pole == 0:
+
                     wybrane_pole = lightup_position.copy()
+
                     if ((1 << convert_position_to_index(wybrane_pole)) & gra.allPiecesTable[currentPlayer]):
                         posible_moves_lightup_positions = []
 
@@ -502,6 +505,7 @@ def main():
                                 pole = convert_index_to_position(moves.getToSquare()).copy()
                                 pole[1] += 0.52
                                 posible_moves_lightup_positions.append(pole)
+
                         czy_aktualizacja = 1
                         czy_wybrane_pole = 1
                 else:
@@ -512,7 +516,10 @@ def main():
                             czy_wybrane_pole = 0
                             czy_aktualizacja = 1
                             currentPlayer  = (currentPlayer + 1) % 2
+                            # print(currentPlayer)
+                            # print(len(gra.pseudoMoves))
                             gra.makeMove(moves)
+                            gra.pseudoMoves = []
                             
                     
 #region sterowanie kursorem
