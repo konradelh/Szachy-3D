@@ -656,7 +656,21 @@ class chess:
       
       
       
-      def makeMove(self, move): 
+      def isCheckmate (self,playerColor): 
+            playerMoves = []
+            checkmated = True
+            for move in self.pseudoMoves:
+                  if(1 << move.getFromSquare() ) & self.allPiecesTable[playerColor]: playerMoves.append(move)
+            
+            for playerMove in playerMoves: 
+                 isValid = self.makeMove(playerMove, returnToPreviousState=True) # bedzie sprawdzac dalej na tej samej pozycji, bo plansza zmieni sie jedynie gdy bedzie jakis mozliwy ruch, a wtedy wypluwane jest od razu false
+                 if(isValid): return False
+            return checkmated
+ 
+
+
+
+      def makeMove(self, move, returnToPreviousState=False): 
             foundPiece = -1
 
             piecesTable = [self.piecesTable[0][:], self.piecesTable[1][:]]
@@ -686,8 +700,8 @@ class chess:
 
 
             piecesTable[color][foundPiece] = self.popBit(piecesTable[color][foundPiece], move.getFromSquare())
-
-            if (move.isPromotion()):       
+            if (move.isPromotion()):
+                        
                   chosenPiece = 5 # Zaimplementowac wybieranie z interfejsu
                   piecesTable[color][foundPiece] = self.insertBit(piecesTable[color][chosenPiece], move.getToSquare())
             else: 
@@ -735,8 +749,16 @@ class chess:
             self.reconstructOccupancy()
 
             isEverythingOK =  not self.isKingAttacked( color) 
-            if isEverythingOK:
+            if isEverythingOK :
                   self.reconstructOccupancy()
+                  if returnToPreviousState:
+                        self.piecesTable = copyPiecesTable
+                        self.allPiecesTable = allPiecesTable
+                        self.white_pieces = white_pieces
+                        self.black_pieces = black_pieces
+                        self.all_pieces = all_pieces
+                        self.pseudoMoves = copyPseudoMoves
+                        
                   return True
             else:
 
@@ -770,17 +792,7 @@ class chess:
             if(self.isAttacked(kingIndex)): 
                   return True
             return False
-      def isCheckamte (self,playerColor): 
-            playerMoves = []
-            checkmated = True
-            for move in self.pseudoMoves:
-                  if(1 << move.getFromSquare() ) & self.allPiecesTable[playerColor]: playerMoves.append(move)
-            
-            for playerMove in playerMoves: 
-                  isValid = self.makeMove(playerMove) # bedzie sprawdzac dalej na tej samej pozycji, bo plansza zmieni sie jedynie gdy bedzie jakis mozliwy ruch, a wtedy wypluwane jest od razu false
-                  if(isValid): return False
-            return checkmated
-
+      
       # def mainGame(self): 
       #       currentPlayer = chess.WHITE
       #       while True: 

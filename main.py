@@ -1,10 +1,13 @@
 import pygame
+import pygame_menu
 import math as m
 import random as r
 from logika import *
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
+display = (2400,1200)
 
 #region kolorki
 PIECE_WHITE = [1,1,0.7]
@@ -446,7 +449,6 @@ def convert_index_to_position(index):
     
 def inicjalizacja():
     pygame.init()
-    display = (2400,1200)
     pygame.display.set_mode(display, DOUBLEBUF|OPENGL)
 
     gluPerspective(60, display[0] / display[1], 0.1, 50)
@@ -463,7 +465,21 @@ def inicjalizacja():
     glLightfv(GL_LIGHT1, GL_SPECULAR, [1, 0.4, 0.6, 1.0])
     glEnable(GL_DEPTH_TEST)
     glEnable(GL_COLOR_MATERIAL)
-#endregion
+
+def menu(kto_wygral):
+    screen = pygame.display.set_mode(display)
+    baner = pygame_menu.themes.THEME_DARK.copy()
+    baner.title_background_color = (230, 80, 130)
+    baner.background_color = (90, 0, 150, 200)
+    baner.widget_font = pygame_menu.font.FONT_8BIT
+    baner.title_font = pygame_menu.font.FONT_8BIT
+
+    menu = pygame_menu.Menu(title=f'Game finished - {kto_wygral} won', width=display[0], height=display[1],theme=baner)
+
+    menu.add.button('NEW GAME', main)
+    menu.add.button('QUIT', pygame_menu.events.EXIT)
+
+    menu.mainloop(screen)
 
 def main():
     inicjalizacja()
@@ -481,6 +497,8 @@ def main():
     czy_wybrane_pole = 0
     wybrane_pole = []
     currentPlayer = 1
+    czy_biale_wygraly = 0
+    czy_czarne_wygraly = 0
 
     while True:
         
@@ -519,6 +537,10 @@ def main():
                             # print(currentPlayer)
                             # print(len(gra.pseudoMoves))
                             gra.makeMove(moves)
+                            if gra.isCheckmate(gra.WHITE):
+                                czy_czarne_wygraly = 1
+                            elif gra.isCheckmate(gra.BLACK):
+                                czy_biale_wygraly = 1
                             gra.pseudoMoves = []
                             
                     
@@ -563,7 +585,7 @@ def main():
 #endregion
         
         #rysowanie planszy
-        if czy_aktualizacja == 1:
+        if czy_aktualizacja == 1 and czy_biale_wygraly == 0 and czy_czarne_wygraly == 0:
             glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
             counter = 1
@@ -629,11 +651,19 @@ def main():
                 knight(PIECE_WHITE,positions_white_knights[i])
             #endregion 
             
+
+
             for i in range(0,len(posible_moves_lightup_positions)):
                 lightup(posible_moves_lightup_positions[i],[1,0,0])
             lightup(lightup_position,[0,1,0])
             czy_aktualizacja = 0
             pygame.display.flip()
             pygame.time.wait(10)
+        elif czy_biale_wygraly == 1:
+            menu('white')
+        elif czy_czarne_wygraly == 1:
+            menu('black')
+            
+
 
 main()
