@@ -548,8 +548,9 @@ def menu(kto_wygral):
     menu.mainloop(screen)
 
 def view_game():
+    global made_moves
     inicjalizacja()
-
+    
     gra = chess()
 
     square_positions = []
@@ -557,9 +558,14 @@ def view_game():
         for i in range (0,8):
             square_positions.append((-3.5+i,-2,-j-5))
     
+    draw_board(square_positions)
+    draw_pieces(gra)
+    pygame.display.flip()
+    pygame.time.wait(10)
+    
     ktory_ruch = 0
-    # for move in made_moves:
     czy_koniec = 0
+
     while czy_koniec != 1:
         for event in pygame.event.get():  
             if event.type == pygame.QUIT:
@@ -577,6 +583,7 @@ def view_game():
                 pygame.display.flip()
                 pygame.time.wait(10)
     pygame.time.wait(1000)
+    made_moves = []
     menu('viewing complete')    
 
 def main():
