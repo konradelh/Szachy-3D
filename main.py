@@ -8,6 +8,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 
 display = (2400,1200)
+made_moves = []
 
 #region kolorki
 PIECE_WHITE = [1,1,0.7]
@@ -424,6 +425,70 @@ def knight(color = [], position = []):
     draw_cone(0.15,0.06,color)
     glPopMatrix()
 
+def draw_board(square_positions = []):
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
+    counter = 1
+    for i in range(0, len(square_positions)):
+        glPushMatrix()
+        glTranslatef(square_positions[i][0],square_positions[i][1],square_positions[i][2])
+
+        if i%8 == 0 and i != 0 and counter == 0:
+            counter = 1
+        elif i%8 == 0 and i != 0 and counter == 1:
+            counter = 0
+                        
+        if counter == 0:
+            draw_square(BOARD_WHITE)
+            counter = 1
+        else:
+            draw_square(BOARD_BLACK)
+            counter = 0
+        glPopMatrix()
+
+def draw_pieces(gra):
+    positions_black_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][0])
+    for i in range(0,len(positions_black_pawns)):
+        pawn(PIECE_BLACK,positions_black_pawns[i])
+    positions_white_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][0])
+    for i in range(0,len(positions_white_pawns)):
+        pawn(PIECE_WHITE,positions_white_pawns[i])
+
+    positions_black_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][2])
+    for i in range (0,len(positions_black_rooks)):
+        rook(PIECE_BLACK,positions_black_rooks[i])
+    positions_white_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][2])
+    for i in range (0,len(positions_white_rooks)):
+        rook(PIECE_WHITE,positions_white_rooks[i])
+
+    positions_black_queens = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][5])
+    for i in range (0,len(positions_black_queens)):
+        queen(PIECE_BLACK,positions_black_queens[i])
+    positions_white_queens = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][5])
+    for i in range (0,len(positions_white_queens)):
+        queen(PIECE_WHITE,positions_white_queens[i])
+
+    positions_black_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][4])
+    for i in range(0,len(positions_black_bishops)):
+        bishop(PIECE_BLACK,positions_black_bishops[i])
+    positions_white_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][4])
+    for i in range(0,len(positions_white_bishops)):
+        bishop(PIECE_WHITE,positions_white_bishops[i])
+
+    positions_black_kings = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][1])
+    for i in range(0,len(positions_black_kings)):
+        king(PIECE_BLACK,positions_black_kings[i])
+    positions_white_kings = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][1])
+    for i in range(0,len(positions_white_kings)):
+        king(PIECE_WHITE,positions_white_kings[i])
+
+    positions_black_knights = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][3])
+    for i in range(0,len(positions_black_knights)):
+        knight(PIECE_BLACK,positions_black_knights[i])
+    positions_white_knights = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][3])
+    for i in range(0,len(positions_white_knights)):
+        knight(PIECE_WHITE,positions_white_knights[i])
+
+
 def convert_BitBoard_to_position(bitboard):
     temp = bitboard
     positions = []
@@ -474,12 +539,46 @@ def menu(kto_wygral):
     baner.widget_font = pygame_menu.font.FONT_8BIT
     baner.title_font = pygame_menu.font.FONT_8BIT
 
-    menu = pygame_menu.Menu(title=f'Game finished - {kto_wygral} won', width=display[0], height=display[1],theme=baner)
+    menu = pygame_menu.Menu(title=f'Game finished - {kto_wygral}', width=display[0], height=display[1],theme=baner)
 
     menu.add.button('NEW GAME', main)
+    menu.add.button('VIEW GAME', view_game)
     menu.add.button('QUIT', pygame_menu.events.EXIT)
 
     menu.mainloop(screen)
+
+def view_game():
+    inicjalizacja()
+
+    gra = chess()
+
+    square_positions = []
+    for j in range(0,8):
+        for i in range (0,8):
+            square_positions.append((-3.5+i,-2,-j-5))
+    
+    ktory_ruch = 0
+    # for move in made_moves:
+    czy_koniec = 0
+    while czy_koniec != 1:
+        for event in pygame.event.get():  
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                menu()
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if ktory_ruch == (len(made_moves) - 1):
+                    czy_koniec = 1
+                gra.makeMove(made_moves[ktory_ruch])
+                ktory_ruch += 1
+                draw_board(square_positions)
+                draw_pieces(gra)
+                pygame.display.flip()
+                pygame.time.wait(10)
+    pygame.time.wait(2000)
+    made_moves = []
+    menu('viewing complete')    
 
 def main():
     inicjalizacja()
@@ -518,17 +617,17 @@ def main():
                         for index in range(64):
                             gra.generateMoves(index)
 
-                        for moves in gra.pseudoMoves:
-                            if moves.getFromSquare() == convert_position_to_index(wybrane_pole):
-                                pole = convert_index_to_position(moves.getToSquare()).copy()
+                        for move in gra.pseudoMoves:
+                            if move.getFromSquare() == convert_position_to_index(wybrane_pole):
+                                pole = convert_index_to_position(move.getToSquare()).copy()
                                 pole[1] += 0.52
                                 posible_moves_lightup_positions.append(pole)
 
                         czy_aktualizacja = 1
                         czy_wybrane_pole = 1
                 else:
-                    for moves in gra.pseudoMoves:
-                        if moves.getToSquare() == convert_position_to_index(lightup_position) and moves.getFromSquare() == convert_position_to_index(wybrane_pole):
+                    for move in gra.pseudoMoves:
+                        if move.getToSquare() == convert_position_to_index(lightup_position) and move.getFromSquare() == convert_position_to_index(wybrane_pole):
                             posible_moves_lightup_positions = []
                             gluLookAt(0,0,-17,0,0,-9,0,1,0)
                             czy_wybrane_pole = 0
@@ -536,11 +635,14 @@ def main():
                             currentPlayer  = (currentPlayer + 1) % 2
                             # print(currentPlayer)
                             # print(len(gra.pseudoMoves))
-                            gra.makeMove(moves)
+                            gra.makeMove(move)
+                            made_moves.append(move)
+
                             if gra.isCheckmate(gra.WHITE):
                                 czy_czarne_wygraly = 1
                             elif gra.isCheckmate(gra.BLACK):
                                 czy_biale_wygraly = 1
+
                             gra.pseudoMoves = []
                             
                     
@@ -584,74 +686,9 @@ def main():
                         czy_aktualizacja = 1
 #endregion
         
-        #rysowanie planszy
         if czy_aktualizacja == 1 and czy_biale_wygraly == 0 and czy_czarne_wygraly == 0:
-            glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
-            counter = 1
-            for i in range(0, len(square_positions)):
-                glPushMatrix()
-                glTranslatef(square_positions[i][0],square_positions[i][1],square_positions[i][2])
-
-                if i%8 == 0 and i != 0 and counter == 0:
-                    counter = 1
-                elif i%8 == 0 and i != 0 and counter == 1:
-                    counter = 0
-                    
-                if counter == 0:
-                    draw_square(BOARD_WHITE)
-                    counter = 1
-                else:
-                    draw_square(BOARD_BLACK)
-                    counter = 0
-                
-                glPopMatrix() 
-
-            #region rysowanie figur
-            positions_black_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][0])
-            for i in range(0,len(positions_black_pawns)):
-                pawn(PIECE_BLACK,positions_black_pawns[i])
-            positions_white_pawns = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][0])
-            for i in range(0,len(positions_white_pawns)):
-                pawn(PIECE_WHITE,positions_white_pawns[i])
-
-            positions_black_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][2])
-            for i in range (0,len(positions_black_rooks)):
-                rook(PIECE_BLACK,positions_black_rooks[i])
-            positions_white_rooks = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][2])
-            for i in range (0,len(positions_white_rooks)):
-                rook(PIECE_WHITE,positions_white_rooks[i])
-
-            positions_black_queens = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][5])
-            for i in range (0,len(positions_black_queens)):
-                queen(PIECE_BLACK,positions_black_queens[i])
-            positions_white_queens = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][5])
-            for i in range (0,len(positions_white_queens)):
-                queen(PIECE_WHITE,positions_white_queens[i])
-
-            positions_black_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][4])
-            for i in range(0,len(positions_black_bishops)):
-                bishop(PIECE_BLACK,positions_black_bishops[i])
-            positions_white_bishops = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][4])
-            for i in range(0,len(positions_white_bishops)):
-                bishop(PIECE_WHITE,positions_white_bishops[i])
-
-            positions_black_kings = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][1])
-            for i in range(0,len(positions_black_kings)):
-                king(PIECE_BLACK,positions_black_kings[i])
-            positions_white_kings = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][1])
-            for i in range(0,len(positions_white_kings)):
-                king(PIECE_WHITE,positions_white_kings[i])
-
-            positions_black_knights = convert_BitBoard_to_position(gra.piecesTable[gra.BLACK][3])
-            for i in range(0,len(positions_black_knights)):
-                knight(PIECE_BLACK,positions_black_knights[i])
-            positions_white_knights = convert_BitBoard_to_position(gra.piecesTable[gra.WHITE][3])
-            for i in range(0,len(positions_white_knights)):
-                knight(PIECE_WHITE,positions_white_knights[i])
-            #endregion 
-            
-
+            draw_board(square_positions)
+            draw_pieces(gra)
 
             for i in range(0,len(posible_moves_lightup_positions)):
                 lightup(posible_moves_lightup_positions[i],[1,0,0])
@@ -660,9 +697,9 @@ def main():
             pygame.display.flip()
             pygame.time.wait(10)
         elif czy_biale_wygraly == 1:
-            menu('white')
+            menu('white won')
         elif czy_czarne_wygraly == 1:
-            menu('black')
+            menu('black won')
             
 
 
