@@ -691,6 +691,10 @@ def main():
                         lightup_position[2] -= 1
                         czy_aktualizacja = 1
 #endregion
+            elif event.type ==pygame.KEYDOWN and event.key == pygame.K_1: gra.changePromotionPiece(2)
+            elif event.type ==pygame.KEYDOWN and event.key == pygame.K_2: gra.changePromotionPiece(3)
+            elif event.type ==pygame.KEYDOWN and event.key == pygame.K_3: gra.changePromotionPiece(4)
+            elif event.type ==pygame.KEYDOWN and event.key == pygame.K_4: gra.changePromotionPiece(5)
         
         if czy_aktualizacja == 1 and czy_biale_wygraly == 0 and czy_czarne_wygraly == 0:
             draw_board(square_positions)

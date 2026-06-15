@@ -33,6 +33,7 @@ class chess:
             self.piecesTable[chess.BLACK][4] = self.black_bishops
             self.piecesTable[chess.BLACK][5] = self.black_queen
 
+            self.pieceToPromoteTo = 5
 
             self.allPiecesTable = [0] * 2
             for i in range(2):
@@ -96,6 +97,12 @@ class chess:
       NEGATIVE_RAY_BITBOARDS = []
 
 
+
+
+
+      def changePromotionPiece(self, piece):
+            if(piece >1 and piece <6): self.pieceToPromoteTo = piece
+            else: piece = 5 
       def generateBishopAttacks(self, square):
 
             attacks = 0
@@ -273,7 +280,7 @@ class chess:
                   masks = [eastMask, northMask, northEastMask, northWestMask]
                   for index, coeff in enumerate(positiveRaysCoefficients.values()): 
                         nextSquare = square 
-                        while 0<= nextSquare <= 63: 
+                        while((nextSquare<63) ): 
                               cls.POSITIVE_RAY_BITBOARDS[index][square] |= 1 << (nextSquare + coeff)
                               cls.POSITIVE_RAY_BITBOARDS[index][square] &= masks[index]
                               cls.POSITIVE_RAY_BITBOARDS[index][square] &= cls.MASK_WHOLE_BOARD
@@ -309,11 +316,11 @@ class chess:
 
                   for index, coeff in enumerate(negativeRaysCoefficients.values()): 
                               nextSquare = square 
-                              while 0<= nextSquare <= 63: 
+                              while(nextSquare  >0): 
                                     cls.NEGATIVE_RAY_BITBOARDS[index][square] |= (1 << nextSquare) >> ( coeff)
                                     nextSquare -= coeff
-                                    cls.NEGATIVE_RAY_BITBOARDS[index][square] &= masks[index]
-                                    cls.NEGATIVE_RAY_BITBOARDS[index][square] &= cls.MASK_WHOLE_BOARD
+                              cls.NEGATIVE_RAY_BITBOARDS[index][square] &= masks[index]
+                              cls.NEGATIVE_RAY_BITBOARDS[index][square] &= cls.MASK_WHOLE_BOARD
             return cls.NEGATIVE_RAY_BITBOARDS
 
 
@@ -321,6 +328,8 @@ class chess:
       @staticmethod
       def getMSB(bitboard): 
             return bitboard.bit_length() -1 
+
+
 
       @staticmethod
       def getLSB(bitboard): 
@@ -375,53 +384,73 @@ class chess:
                   if (color == chess.WHITE):
                               toSquare = fromSquare << 8
                               if (toSquare & ~self.all_pieces):
-                                    self.pseudoMoves.append(Move(fromSquareIndex, fromSquareIndex + 8, 0,0,1,0))
-                                    print(f" push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(fromSquareIndex + 8)}")
+                                    if (fromSquare & self.RANK_7): 
+                                                self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0, 0 ,0 , 1))
+                                                print(f" promotion push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
+ 
                                     if(fromSquare & self.RANK_2): 
                                           toSquare <<= 8 
                                           if(toSquare & ~self.all_pieces): 
                                                 self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0,0,1,0))
                                                 print(f" double push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
-                                    if (fromSquare & self.RANK_7): 
-                                                self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0,0,0,1))
-                                                print(f" promotion push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
-                                    if ((fromSquareIndex +7 == potentialEnPassant)  or (fromSquareIndex + 9 == potentialEnPassant))  and ((1<<(potentialEnPassant -8 )) & self.piecesTable[chess.BLACK][0]):
-                                          self.pseudoMoves.append(Move(fromSquareIndex, potentialEnPassant, 1,0,0,0,1))
-                                          print(f"en passant capture from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(potentialEnPassant)}")
+                                    if(fromSquare & ~ self.RANK_7):
+                                              self.pseudoMoves.append(Move(fromSquareIndex, fromSquareIndex + 8, 0,0,1,0))
+                                              print(f" push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(fromSquareIndex + 8)}")
+
 
                               attacks = chess.PAWN_ATTACKS[color][fromSquareIndex]
                               while (attacks != 0): 
                                      possibleAttackIndex = self.getMSB(attacks)
                                      possibleAttack = 1 << possibleAttackIndex
                                      if (possibleAttack & opponent_occupancy): 
-                                           self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,0))
-                                           print(f"attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                          if possibleAttack & self.RANK_8:
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,1))
+                                                print(f"promotion attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                          else: 
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,0))
+                                                print(f"attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                     elif possibleAttack & (1 << potentialEnPassant) :
+                                          if((1 << (potentialEnPassant - 8)) & self.piecesTable[chess.BLACK][0]):
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex, 1, 0, 0, 0, 1))
+                                                print(f"en passant capture from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(potentialEnPassant)}")
+
                                      attacks = self.popBit(attacks, possibleAttackIndex) 
 
                   else: 
                               toSquare = fromSquare >> 8
                               if (toSquare & ~self.all_pieces):
-                                    self.pseudoMoves.append(Move(fromSquareIndex, fromSquareIndex - 8, 0,0,1,0))
-                                    print(f" push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(fromSquareIndex -8)}")
+                                    if(fromSquare & self.RANK_2): 
+                                                self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0,0,0,1))
+                                                print(f" promotion push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
+ 
                                     if(fromSquare & self.RANK_7): 
+                                          
                                           toSquare >>= 8 
                                           if(toSquare & ~self.all_pieces): 
                                                 self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0,0,1,0))
                                                 print(f" double push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
-                                    if (fromSquare & self.RANK_2): 
-                                                self.pseudoMoves.append(Move(fromSquareIndex, self.getMSB(toSquare), 0,0,0,1))
-                                                print(f" promotion push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(self.getMSB(toSquare))}")
-                                    if ((fromSquareIndex -7 == potentialEnPassant)  or (fromSquareIndex - 9 == potentialEnPassant))and ((1<<(potentialEnPassant +8 )) & self.piecesTable[chess.WHITE][0]):
-                                                                              self.pseudoMoves.append(Move(fromSquareIndex, potentialEnPassant, 1,0,0,0,1))
-                                                                              print(f"en passant capture from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(potentialEnPassant)}")
+                                    if (fromSquare & ~self.RANK_2): 
+                                          self.pseudoMoves.append(Move(fromSquareIndex, fromSquareIndex - 8, 0,0,1,0))
+                                          print(f" push from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(fromSquareIndex -8)}")
 
+                                   
                               attacks = chess.PAWN_ATTACKS[color][fromSquareIndex]
                               while (attacks != 0): 
                                      possibleAttackIndex = self.getMSB(attacks)
                                      possibleAttack = 1 << possibleAttackIndex
+
                                      if (possibleAttack & opponent_occupancy): 
-                                           self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,0))
-                                           print(f"attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                          if possibleAttack & self.RANK_8:
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,1))
+                                                print(f"promotion attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                          else: 
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex,1,0,0,0))
+                                                print(f"attack pawn move from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(possibleAttackIndex)}")
+                                     elif possibleAttack & (1 << potentialEnPassant):
+                                          if( (1 <<(potentialEnPassant + 8)) & self.piecesTable[chess.WHITE][0] ):
+                                                self.pseudoMoves.append(Move(fromSquareIndex, possibleAttackIndex, 1, 0, 0, 0, 1))
+                                                print(f"en passant capture from {self.indexToSquare(fromSquareIndex)} to {self.indexToSquare(potentialEnPassant)}")
+
                                      attacks = self.popBit(attacks, possibleAttackIndex) 
 
 
@@ -621,55 +650,41 @@ class chess:
                       # change the line above to: self.enPassantSquare = ep_square_index
               else:
                   self.enPassantSquare = 0                   
-      # def printBoard(self):  # DO debugowania USUN POZNIEJ 
-      #             print("   -----------------")
+      def printBoard(self):  # DO debugowania USUN POZNIEJ 
+                  print("   -----------------")
             
-      #             # Character map matching your piecesTable indices:
-      #             # 0: Pawns, 1: King, 2: Rooks, 3: Knights, 4: Bishops, 5: Queen
-      #             piece_chars = {
-      #                   chess.WHITE: ['P', 'K', 'R', 'N', 'B', 'Q'],
-      #                   chess.BLACK: ['p', 'k', 'r', 'n', 'b', 'q']
-      #             }
+                  # Character map matching your piecesTable indices:
+                  # 0: Pawns, 1: King, 2: Rooks, 3: Knights, 4: Bishops, 5: Queen
+                  piece_chars = {
+                        chess.WHITE: ['P', 'K', 'R', 'N', 'B', 'Q'],
+                        chess.BLACK: ['p', 'k', 'r', 'n', 'b', 'q']
+                  }
 
-      #             for rank in reversed(range(8)): 
-      #                   rowString = f"{rank + 1} | "
-      #                   for file in range(8): 
-      #                         mask = 1 << (rank * 8 + file)
-      #                         char_to_print = '.' # Default empty square
+                  for rank in reversed(range(8)): 
+                        rowString = f"{rank + 1} | "
+                        for file in range(8): 
+                              mask = 1 << (rank * 8 + file)
+                              char_to_print = '.' # Default empty square
                         
-      #                         # Only search for a piece if the square is occupied
-      #                         if mask & self.all_pieces: 
-      #                               found = False
-      #                               for color in (chess.WHITE, chess.BLACK):
-      #                                     for piece_idx in range(6):
-      #                                           if mask & self.piecesTable[color][piece_idx]:
-      #                                                 char_to_print = piece_chars[color][piece_idx]
-      #                                                 found = True
-      #                                                 break
-      #                                     if found:
-      #                                           break
+                              # Only search for a piece if the square is occupied
+                              if mask & self.all_pieces: 
+                                    found = False
+                                    for color in (chess.WHITE, chess.BLACK):
+                                          for piece_idx in range(6):
+                                                if mask & self.piecesTable[color][piece_idx]:
+                                                      char_to_print = piece_chars[color][piece_idx]
+                                                      found = True
+                                                      break
+                                          if found:
+                                                break
                                           
-      #                         rowString += char_to_print + " "
-      #                   print(rowString) 
-      #             print("   -----------------")
-      #             print("    a b c d e f g h")
+                              rowString += char_to_print + " "
+                        print(rowString) 
+                  print("   -----------------")
+                  print("    a b c d e f g h")
       
       
       
-      def isCheckmate (self,playerColor): 
-            playerMoves = []
-            checkmated = True
-            for move in self.pseudoMoves:
-                  if(1 << move.getFromSquare() ) & self.allPiecesTable[playerColor]: playerMoves.append(move)
-            
-            for playerMove in playerMoves: 
-                 isValid = self.makeMove(playerMove, returnToPreviousState=True) # bedzie sprawdzac dalej na tej samej pozycji, bo plansza zmieni sie jedynie gdy bedzie jakis mozliwy ruch, a wtedy wypluwane jest od razu false
-                 if(isValid): return False
-            return checkmated
- 
-
-
-
       def makeMove(self, move, returnToPreviousState=False): 
             foundPiece = -1
 
@@ -700,10 +715,11 @@ class chess:
 
 
             piecesTable[color][foundPiece] = self.popBit(piecesTable[color][foundPiece], move.getFromSquare())
+            print(f"promocja ? {move.isPromotion()}")
             if (move.isPromotion()):
                         
-                  chosenPiece = 5 # Zaimplementowac wybieranie z interfejsu
-                  piecesTable[color][foundPiece] = self.insertBit(piecesTable[color][chosenPiece], move.getToSquare())
+                  chosenPiece = self.pieceToPromoteTo # Zaimplementowac wybieranie z interfejsu
+                  piecesTable[color][chosenPiece] = self.insertBit(piecesTable[color][chosenPiece], move.getToSquare())
             else: 
                   piecesTable[color][foundPiece] = self.insertBit(piecesTable[color][foundPiece], move.getToSquare())
 
@@ -736,8 +752,11 @@ class chess:
                   if (opponendFoundPiece != -1):
                         piecesTable[opponentColor][opponendFoundPiece] = self.popBit(piecesTable[opponentColor][opponendFoundPiece], move.getToSquare())
 
-            self.enPassantSquare = 0
-            if move.isDoublePush():
+            if not returnToPreviousState:            
+                  self.enPassantSquare = 0
+            if move.isDoublePush() and not returnToPreviousState:
+
+                  self.enPassantSquare = 0
                   if color == chess.WHITE:
                         self.enPassantSquare = move.getToSquare() - 8
                   else:
@@ -774,13 +793,13 @@ class chess:
 
 
       def reconstructOccupancy(self):
-            self.allPiecesTable = [0, 0]
-            for i in range(2):
-                  for j in range(6): 
-                        self.allPiecesTable[i] |= self.piecesTable[i][j]
-            self.white_pieces = self.allPiecesTable[chess.WHITE]
-            self.black_pieces = self.allPiecesTable[chess.BLACK]
-            self.all_pieces = self.white_pieces | self.black_pieces
+             self.allPiecesTable = [0, 0]
+             for i in range(2):
+                      for j in range(6): 
+                            self.allPiecesTable[i] |= self.piecesTable[i][j]
+             self.white_pieces = self.allPiecesTable[chess.WHITE]
+             self.black_pieces = self.allPiecesTable[chess.BLACK]
+             self.all_pieces = self.white_pieces | self.black_pieces
             
 
       def isKingAttacked(self, playerColor): 
@@ -790,35 +809,48 @@ class chess:
             king = self.piecesTable[playerColor][1]
             kingIndex = self.getLSB(king)
             if(self.isAttacked(kingIndex)): 
-                  return True
+                        return True
             return False
-      
-      # def mainGame(self): 
-      #       currentPlayer = chess.WHITE
-      #       while True: 
-      #             game.printBoard()
-      #             for index in range(64): 
-      #                   self.generateMoves(index)
-      #             inputFromSquare = input("Enter from square: ")
-      #             inputToSquare = input("Enter to square : ")
+      def isCheckmate (self,playerColor): 
+            playerMoves = []
+            checkmated = True
+            for move in self.pseudoMoves:
+                  if(1 << move.getFromSquare() ) & self.allPiecesTable[playerColor]: playerMoves.append(move)
+            
+            for playerMove in playerMoves: 
+                 isValid = self.makeMove(playerMove, returnToPreviousState=True) # bedzie sprawdzac dalej na tej samej pozycji, bo plansza zmieni sie jedynie gdy bedzie jakis mozliwy ruch, a wtedy wypluwane jest od razu false
+                 if(isValid): return False
+            return checkmated
+                  
+            
 
-      #             fromSquareIndex = chess.SQUARES[inputFromSquare]
-      #             toSquareIndex = chess.SQUARES[inputToSquare]
+      def mainGame(self): 
+            currentPlayer = chess.WHITE
+            while True: 
 
-      #             while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
-      #                   inputFromSquare = input("Enter from square: ")
-      #                   inputToSquare = input("Enter to square : ")
-      #                   fromSquareIndex = chess.SQUARES[inputFromSquare]
-      #                   toSquareIndex = chess.SQUARES[inputToSquare]
+                  self.printBoard()
+                  for index in range(64): 
+                        self.generateMoves(index)
+                  inputFromSquare = input("Enter from square: ")
+                  inputToSquare = input("Enter to square : ")
+
+                  fromSquareIndex = chess.SQUARES[inputFromSquare]
+                  toSquareIndex = chess.SQUARES[inputToSquare]
+
+                  while ((1 << fromSquareIndex )& ~self.allPiecesTable[currentPlayer]):
+                        inputFromSquare = input("Enter from square: ")
+                        inputToSquare = input("Enter to square : ")
+                        fromSquareIndex = chess.SQUARES[inputFromSquare]
+                        toSquareIndex = chess.SQUARES[inputToSquare]
 
 
 
-      #             for move in self.pseudoMoves: 
-      #                   if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
-      #                         self.makeMove(move)
-      #                         break
-      #             game.printBoard()
-      #             currentPlayer  = (currentPlayer + 1) % 2
+                  for move in self.pseudoMoves: 
+                        if move.getFromSquare() == fromSquareIndex and move.getToSquare() == toSquareIndex: 
+                              self.makeMove(move)
+                              break
+                  self.printBoard()
+                  currentPlayer  = (currentPlayer + 1) % 2
 
 
 class Move: 
@@ -852,9 +884,7 @@ chess.KNIGHT_ATTACKS = chess.generateKnightAttacks()
 chess.POSITIVE_RAY_BITBOARDS = chess.generatePositiveRays()
 chess.NEGATIVE_RAY_BITBOARDS = chess.generateNegativeRays()
 chess.KING_ATTACKS = chess.generateKingAttacks()
-# game = chess()
-
-
+game = chess() 
 #game.printBoard()
 #game.printBitBoard(chess.KNIGHT_ATTACKS[chess.SQUARES['e5']])
 #print(chess.SQUARES['h8'])
@@ -878,6 +908,7 @@ chess.KING_ATTACKS = chess.generateKingAttacks()
 #game.printBitBoard(game.generateBishopAttacks(chess.SQUARES["c8"]))
 #for index in range(64): 
 #      game.generateMoves(index)
-
-
-# game.mainGame()
+#for index in range(64): 
+      #game.generateMoves(index)
+#game.printBoard()
+#print(game.isCheckamte(chess.WHITE)
